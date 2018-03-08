@@ -9,6 +9,9 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+
+using boost::multiprecision::cpp_dec_float_50;
 
 // to yield a fast regression environment for productive development
 // we want to leverage the IEEE floating point hardware available on x86 and ARM.
@@ -730,6 +733,7 @@ public:
 
 	
 	// Maybe remove explicit, MTL compiles, but we have lots of double computation then
+	explicit operator cpp_dec_float_50() const { return to_cpp_dec_float_50(); }
 	explicit operator long double() const { return to_long_double(); }
 	explicit operator double() const { return to_double(); }
 	explicit operator float() const { return to_float(); }
@@ -1002,6 +1006,15 @@ private:
 		double r = regime_value(); // regime value itself will fit in a double
 		double e = exponent_value(); // same with exponent
 		long double f = (long double)(1.0) + _fraction.value();
+		return s * r * e * f;
+	}
+	cpp_dec_float_50 to_cpp_dec_float_50() const {
+		if (isZero())  return 0.0;
+		if (isNaR())   return NAN;
+		int s = sign_value();
+		cpp_dec_float_50 r = regime_value(); // regime value itself will fit in a double
+		cpp_dec_float_50 e = exponent_value(); // same with exponent
+		cpp_dec_float_50 f = (cpp_dec_float_50)(1.0) + _fraction.value();
 		return s * r * e * f;
 	}
 

@@ -6,9 +6,12 @@
 // This file is part of the universal numbers project, which is released under an MIT Open Source license.
 #include <cassert>
 #include <limits>
+#include <boost/multiprecision/cpp_dec_float.hpp>
 
 #include "bit_functions.hpp"
 #include "trace_constants.hpp"
+
+using boost::multiprecision::cpp_dec_float_50;
 
 namespace sw {
 	namespace unum {
@@ -353,6 +356,9 @@ namespace sw {
 				}
 				return v;
 			}
+			cpp_dec_float_50 to_cpp_dec_float_50() const {
+				return sign_value() * scale_value() * fraction_value<cpp_dec_float_50>();
+			}
 			long double to_long_double() const {
 				return sign_value() * scale_value() * fraction_value<long double>();
 			}
@@ -363,6 +369,7 @@ namespace sw {
 				return float(sign_value() * scale_value() * fraction_value<float>());
 			}
 			// Maybe remove explicit
+			explicit operator cpp_dec_float_50() const { return to_cpp_dec_float_50(); }
 			explicit operator long double() const { return to_long_double(); }
 			explicit operator double() const { return to_double(); }
 			explicit operator float() const { return to_float(); }
