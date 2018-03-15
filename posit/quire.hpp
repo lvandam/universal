@@ -8,9 +8,9 @@
 namespace sw {
 	namespace unum {
 
-/* 
+/*
  quire: template class representing a quire associated with a posit configuration
- nbits and es are the same as the posit configuration, 
+ nbits and es are the same as the posit configuration,
  capacity indicates the power of 2 number of accumulations of maxpos^2 the quire can support
 
  All values in and out of the quire are normalized (sign, scale, fraction) triplets.
@@ -26,7 +26,7 @@ public:
 	static constexpr size_t radix_point = half_range;
 	static constexpr size_t upper_range = half_range + 1;     // size of the upper accumulator
 	static constexpr size_t qbits = range + capacity;     // size of the quire minus the sign bit: we are managing the sign explicitly
-	
+
 	// Constructors
 	quire() : _sign(false) { _capacity.reset(); _upper.reset(); _lower.reset(); }
 	quire(int8_t initial_value) {
@@ -50,6 +50,9 @@ public:
 	quire(double initial_value) {
 		*this = initial_value;
 	}
+	quire(cpp_dec_float_50 initial_value) {
+		*this = initial_value;
+	}
 	template<size_t fbits>
 	quire(const value<fbits>& rhs) {
 		*this = rhs;
@@ -68,7 +71,7 @@ public:
 
 		int scale = rhs.scale();
 		// TODO: we are clamping the values of the RHS to be within the dynamic range of the posit
-		// TODO: however, on the upper side we also have the capacity bits, which gives us the opportunity 
+		// TODO: however, on the upper side we also have the capacity bits, which gives us the opportunity
 		// TODO: to accept larger scale values than the dynamic range of the posit.
 		// TODO: When you are assigning the sum of quires you could hit this condition.
 		if (scale >  int(half_range)) 	throw "RHS value too large for quire";
@@ -175,12 +178,12 @@ public:
 		return *this;
 	}
 	quire& operator=(long double rhs) {
-		constexpr int bits = std::numeric_limits<long double>::digits - 1;	
+		constexpr int bits = std::numeric_limits<long double>::digits - 1;
 		*this = value<bits>(rhs);
 		return *this;
 	}
 
-	// Add a normalized value to the quire value. 
+	// Add a normalized value to the quire value.
 	// All values in (and out) of the quire are normalized (sign, scale, fraction) triplets.
 	template<size_t fbits>
 	quire& operator+=(const value<fbits>& rhs) {
@@ -224,7 +227,7 @@ public:
 		}
 		return *this;
 	}
-	
+
 	// Subtract a normalized value from the quire value
 	template<size_t fbits>
 	quire& operator-=(const value<fbits>& rhs) {
@@ -253,7 +256,7 @@ public:
 	void set_sign(bool v) { _sign = v; }
 
 	// Selectors
-	
+
 	// Compare magnitudes between quire and value: returns -1 if q < v, 0 if q == v, and 1 if q > v
 	template<size_t fbits>
 	int CompareMagnitude(const value<fbits>& v) {
@@ -653,7 +656,7 @@ inline bool operator==(const quire<nbits, es, capacity>& lhs, const quire<nbits,
 template<size_t nbits, size_t es, size_t capacity>
 inline bool operator!=(const quire<nbits, es, capacity>& lhs, const quire<nbits, es, capacity>& rhs) { return !operator==(lhs, rhs); }
 template<size_t nbits, size_t es, size_t capacity>
-inline bool operator< (const quire<nbits, es, capacity>& lhs, const quire<nbits, es, capacity>& rhs) { 
+inline bool operator< (const quire<nbits, es, capacity>& lhs, const quire<nbits, es, capacity>& rhs) {
 	bool bSmaller = false;
 	if (!lhs._sign && rhs._sign) {
 		bSmaller = true;
@@ -722,7 +725,7 @@ inline bool operator< (const quire<nbits, es, capacity>& q, const value<fbits>& 
 	return bSmaller;
 }
 template<size_t nbits, size_t es, size_t capacity, size_t fbits>
-inline bool operator> (const quire<nbits, es, capacity>& q, const value<fbits>& v) { 
+inline bool operator> (const quire<nbits, es, capacity>& q, const value<fbits>& v) {
 	bool bBigger = false;  // default fall through is quire q is smaller than value v
 	if (!q.sign() && v.sign()) {
 		bBigger = true;

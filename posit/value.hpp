@@ -15,7 +15,7 @@ using boost::multiprecision::cpp_dec_float_50;
 
 namespace sw {
 	namespace unum {
-		
+
 		// Forward definitions
 		template<size_t fbits> class value;
 		template<size_t fbits> value<fbits> abs(const value<fbits>& v);
@@ -49,6 +49,9 @@ namespace sw {
 				*this = initial_value;
 			}
 			value(long double initial_value) {
+				*this = initial_value;
+			}
+			value(cpp_dec_float_50 initial_value) {
 				*this = initial_value;
 			}
 			value(const value& rhs) {
@@ -232,7 +235,7 @@ namespace sw {
 			}
 
 			// operators
-			value<fbits> operator-() const {				
+			value<fbits> operator-() const {
 				return value<fbits>(!_sign, _scale, _fraction, _zero, _inf);
 			}
 
@@ -278,7 +281,7 @@ namespace sw {
 				_zero     = false;
 				_inf      = false;
 				_scale    = 0;
-				_nrOfBits = fbits;	
+				_nrOfBits = fbits;
 				_fraction.reset();
 			}
 			inline void setExponent(int e) { _scale = e; }
@@ -299,7 +302,7 @@ namespace sw {
 					throw shift_too_large{};
 
 				const long hpos = fbits + shift;       // position of hidden bit
-														  
+
 				if (hpos <= 0) {   // If hidden bit is LSB or beyond just set uncertainty bit and call it a day
 					number[0] = true;
 					return number;
@@ -496,13 +499,13 @@ namespace sw {
 		// add module
 		template<size_t fbits, size_t abits>
 		void module_add(const value<fbits>& lhs, const value<fbits>& rhs, value<abits + 1>& result) {
-			// with sign/magnitude adders it is customary to organize the computation 
+			// with sign/magnitude adders it is customary to organize the computation
 			// along the four quadrants of sign combinations
 			//  + + = +
 			//  + - =   lhs > rhs ? + : -
 			//  - + =   lhs > rhs ? - : +
-			//  - - = 
-			// to simplify the result processing assign the biggest 
+			//  - - =
+			// to simplify the result processing assign the biggest
 			// absolute value to R1, then the sign of the result will be sign of the value in R1.
 
 			if (lhs.isInfinite() || rhs.isInfinite()) {
@@ -538,7 +541,7 @@ namespace sw {
 			if (carry) {
 				if (r1_sign == r2_sign) {  // the carry && signs== implies that we have a number bigger than r1
 					shift = -1;
-				} 
+				}
 				else {
 					// the carry && signs!= implies r2 is complement, result < r1, must find hidden bit (in the complement)
 					for (int i = abits - 1; i >= 0 && !sum[i]; i--) {
@@ -548,14 +551,14 @@ namespace sw {
 			}
 			assert(shift >= -1);
 
-			if (shift >= long(abits)) {            // we have actual 0                            
+			if (shift >= long(abits)) {            // we have actual 0
 				sum.reset();
 				result.set(false, 0, sum, true, false, false);
 				return;
 			}
 
 			scale_of_result -= shift;
-			const int hpos = abits - 1 - shift;         // position of the hidden bit 
+			const int hpos = abits - 1 - shift;         // position of the hidden bit
 			sum <<= abits - hpos + 1;
 			if (_trace_add) std::cout << (r1_sign ? "sign -1" : "sign  1") << " scale " << std::setw(3) << scale_of_result << " sum     " << sum << std::endl;
 			result.set(r1_sign, scale_of_result, sum, false, false, false);
@@ -607,14 +610,14 @@ namespace sw {
 			}
 			assert(shift >= -1);
 
-			if (shift >= long(abits)) {            // we have actual 0                            
+			if (shift >= long(abits)) {            // we have actual 0
 				sum.reset();
 				result.set(false, 0, sum, true, false, false);
 				return;
 			}
 
 			scale_of_result -= shift;
-			const int hpos = abits - 1 - shift;         // position of the hidden bit 
+			const int hpos = abits - 1 - shift;         // position of the hidden bit
 			sum <<= abits - hpos + 1;
 			if (_trace_sub) std::cout << (r1_sign ? "sign -1" : "sign  1") << " scale " << std::setw(3) << scale_of_result << " sum     " << sum << std::endl;
 			result.set(r1_sign, scale_of_result, sum, false, false, false);
@@ -659,14 +662,14 @@ namespace sw {
 			}
 			assert(shift >= -1);
 
-			if (shift >= long(abits)) {            // we have actual 0                            
+			if (shift >= long(abits)) {            // we have actual 0
 				difference.reset();
 				result.set(false, 0, difference, true, false, false);
 				return;
 			}
 
 			scale_of_result -= shift;
-			const int hpos = abits - 1 - shift;         // position of the hidden bit 
+			const int hpos = abits - 1 - shift;         // position of the hidden bit
 			difference <<= abits - hpos + 1;
 			if (_trace_sub) std::cout << (borrow ? "sign -1" : "sign  1") << " scale " << std::setw(3) << scale_of_result << " result  " << difference << std::endl;
 			result.set(borrow, scale_of_result, difference, false, false, false);
@@ -705,7 +708,7 @@ namespace sw {
 					if (_trace_mul) std::cout << " shift " << shift << std::endl;
 					new_scale += 1;
 				}
-				result_fraction <<= shift;    // shift hidden bit out	
+				result_fraction <<= shift;    // shift hidden bit out
 			}
 			else {   // posit<3,0>, <4,1>, <5,2>, <6,3>, <7,4> etc are pure sign and scale
 				// multiply the hidden bits together, i.e. 1*1: we know the answer a priori
