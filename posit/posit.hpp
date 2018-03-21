@@ -1067,6 +1067,9 @@ private:
 	friend bool operator<=(const posit<nnbits, ees>& lhs, double rhs);
 	template<size_t nnbits, size_t ees>
 	friend bool operator>=(const posit<nnbits, ees>& lhs, double rhs);
+    // posit - long double
+    template<size_t nnbits, size_t ees>
+    friend bool operator> (long double lhs, const posit<nnbits, ees>& rhs);
 #endif // POSIT_ENABLE_LITERALS
 
 };
@@ -1120,6 +1123,9 @@ template<size_t nbits, size_t es>
 inline bool operator>=(const posit<nbits, es>& lhs, const posit<nbits, es>& rhs) {
 	return !operator< (lhs, rhs);
 }
+template<size_t nbits, size_t es>
+inline bool operator> (long double lhs, const posit<nbits, es>& rhs) {
+    return operator< (rhs, posit<nbits, es>(lhs));
 
 // posit - posit binary arithmetic operators
 // BINARY ADDITION
