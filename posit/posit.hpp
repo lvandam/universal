@@ -20,7 +20,7 @@ using boost::multiprecision::cpp_dec_float_50;
 // ARM only provides a 64bit double format.
 // This conditional section is intended to create a unification of a long double format across
 // different compilation environments that creates a fast verification environment through consistent hw support.
-// Another option is to use a multiprecision floating point emulation layer. 
+// Another option is to use a multiprecision floating point emulation layer.
 // Side note: the performance of the bitset<> manipulation is slower than a multiprecision floating point implementation
 // so this comment is talking about issues that will come to pass when we transition to a high performance sw emulation.
 
@@ -116,24 +116,24 @@ class posit {
 		convert(v);
 		return *this;
 	}
-    
+
 public:
 	static constexpr size_t rbits   = nbits - 1;
 	static constexpr size_t ebits   = es;
-	static constexpr size_t fbits   = nbits - 3 - es;  
+	static constexpr size_t fbits   = nbits - 3 - es;
 	static constexpr size_t abits   = fbits + 4;       // size of the addend
 	static constexpr size_t fhbits  = fbits + 1;       // size of fraction + hidden bit
 	static constexpr size_t mbits   = 2 * fhbits;      // size of the multiplier output
 	static constexpr size_t divbits = 3 * fhbits + 4;  // size of the divider output
 
 	posit() { setToZero();  }
-	
+
 	posit(const posit&) = default;
 	posit(posit&&) = default;
-	
+
 	posit& operator=(const posit&) = default;
 	posit& operator=(posit&&) = default;
-	
+
 	/// Construct posit from its components
 	posit(bool sign, const regime<nbits, es>& r, const exponent<nbits, es>& e, const fraction<fbits>& f)
           : _sign(sign), _regime(r), _exponent(e), _fraction(f) {
@@ -236,7 +236,7 @@ public:
 	posit<nbits, es>& operator=(long double rhs) {
        		return float_assign(rhs);
 	}
-	
+
 	// prefix operator
 	posit<nbits, es> operator-() const {
 		if (isZero()) {
@@ -282,7 +282,7 @@ public:
 		else {
 			convert(sum);
 		}
-		return *this;                
+		return *this;
 	}
 	posit<nbits, es>& operator+=(double rhs) {
 		return *this += posit<nbits, es>(rhs);
@@ -371,7 +371,7 @@ public:
 		if (rhs.isNaR()) {
 			setToNaR();
 			return *this;
-		}		
+		}
 		if (isZero() || isNaR()) {
 			return *this;
 		}
@@ -549,7 +549,7 @@ public:
 		for (size_t i = 0; i < nrRegimeBits; i++) {
 			_Bits.set(std::size_t(msb--), r[nbits - 2 - i]);
 		}
-		if (msb < 0) 
+		if (msb < 0)
                     return _Bits;
 		for (size_t i = 0; i < nrExponentBits && msb >= 0; i++) {
 			_Bits.set(std::size_t(msb--), e[es - 1 - i]);
@@ -709,7 +709,7 @@ public:
 		if (_sign) {
 			std::bitset<nbits> tmp(raw_bits);
 			tmp.reset(nbits - 1);
-			if (tmp.none()) {			
+			if (tmp.none()) {
 				setToNaR();  // special case = NaR (Not a Real)
 			}
 			else {
@@ -729,9 +729,9 @@ public:
 		// we are storing both the raw bit representation and the decoded form
 		// so no need to transform back via 2's complement of regime/exponent/fraction
 	}
-	
 
-	
+
+
 	// Maybe remove explicit, MTL compiles, but we have lots of double computation then
 	explicit operator cpp_dec_float_50() const { return to_cpp_dec_float_50(); }
 	explicit operator long double() const { return to_long_double(); }
@@ -840,7 +840,7 @@ public:
 	int scale() const {
 		// how many shifts represent the regime?
 		// regime = useed ^ k = 2 ^ (k*(2 ^ e))
-		// scale = useed ^ k * 2^e 
+		// scale = useed ^ k * 2^e
 		return _regime.scale() + _exponent.scale();
 	}
 	unsigned int exp() const {
@@ -861,7 +861,7 @@ public:
 		bool carry = _fraction.increment();
 		if (carry && es > 0)
 			carry = _exponent.increment();
-		if (carry) 
+		if (carry)
                     _regime.increment();
 	}
 	// step up to the next posit in a lexicographical order
@@ -876,7 +876,7 @@ public:
 		decrement_bitset(raw);
 		decode(raw);
 	}
-	
+
 	// Generalized version
 	template <size_t FBits>
 	inline void convert(const value<FBits>& v) {
@@ -1126,6 +1126,7 @@ inline bool operator>=(const posit<nbits, es>& lhs, const posit<nbits, es>& rhs)
 template<size_t nbits, size_t es>
 inline bool operator> (long double lhs, const posit<nbits, es>& rhs) {
     return operator< (rhs, posit<nbits, es>(lhs));
+}
 
 // posit - posit binary arithmetic operators
 // BINARY ADDITION
@@ -1268,7 +1269,7 @@ inline posit<nbits, es> operator/(const posit<nbits, es>& lhs, double rhs) {
 #endif // POSIT_ENABLE_LITERALS
 
 // Magnitude of a posit (equivalent to turning the sign bit off).
-template<size_t nbits, size_t es> 
+template<size_t nbits, size_t es>
 posit<nbits, es> abs(const posit<nbits, es>& p) {
     return posit<nbits, es>(false, p.get_regime(), p.get_exponent(), p.get_fraction());
 }
@@ -1318,8 +1319,8 @@ value<2*(nbits - 2 - es)> quire_mul(const posit<nbits, es>& lhs, const posit<nbi
 	static constexpr size_t mbits = 2 * fhbits;      // size of the multiplier output
 
 	value<mbits> product;
-	value<fbits> a, b;	
-	
+	value<fbits> a, b;
+
 	if (lhs.isZero() || rhs.isZero()) return product;
 
 	// transform the inputs into (sign,scale,fraction) triples
