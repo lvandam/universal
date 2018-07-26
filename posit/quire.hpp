@@ -53,6 +53,9 @@ public:
 	quire(cpp_dec_float_50 initial_value) {
 		*this = initial_value;
 	}
+    quire(cpp_dec_float_100 initial_value) {
+        *this = initial_value;
+    }
 	template<size_t fbits>
 	quire(const value<fbits>& rhs) {
 		*this = rhs;

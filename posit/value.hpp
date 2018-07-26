@@ -12,6 +12,7 @@
 #include "trace_constants.hpp"
 
 using boost::multiprecision::cpp_dec_float_50;
+using boost::multiprecision::cpp_dec_float_100;
 
 namespace sw {
 	namespace unum {
@@ -52,6 +53,9 @@ namespace sw {
 				*this = initial_value;
 			}
 			value(cpp_dec_float_50 initial_value) {
+				*this = initial_value;
+			}
+			value(cpp_dec_float_100 initial_value) {
 				*this = initial_value;
 			}
 			value(const value& rhs) {
@@ -362,6 +366,9 @@ namespace sw {
 			cpp_dec_float_50 to_cpp_dec_float_50() const {
 				return sign_value() * scale_value() * fraction_value<cpp_dec_float_50>();
 			}
+			cpp_dec_float_100 to_cpp_dec_float_100() const {
+				return sign_value() * scale_value() * fraction_value<cpp_dec_float_100>();
+			}
 			long double to_long_double() const {
 				return sign_value() * scale_value() * fraction_value<long double>();
 			}
@@ -373,6 +380,7 @@ namespace sw {
 			}
 			// Maybe remove explicit
 			explicit operator cpp_dec_float_50() const { return to_cpp_dec_float_50(); }
+			explicit operator cpp_dec_float_100() const { return to_cpp_dec_float_100(); }
 			explicit operator long double() const { return to_long_double(); }
 			explicit operator double() const { return to_double(); }
 			explicit operator float() const { return to_float(); }
